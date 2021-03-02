@@ -1,0 +1,9 @@
+{
+    "require": {
+        "nmred/kafka-php": "v0.2.0.8",
+        "ramsey/uuid": "^4.1"
+    },
+    "autoload": {
+        "psr-4": {"Helloprint\\": "src"}
+    }
+}
