@@ -40,7 +40,7 @@ class Broker extends PDO
     {
         $config = ProducerConfig::getInstance();
         $config->setMetadataRefreshIntervalMs(10000);
-        $config->setMetadataBrokerList('localhost:9092');
+        $config->setMetadataBrokerList('kafka:9092');
         $config->setBrokerVersion('1.0.0');
         $config->setRequiredAck(1);
         $config->setIsAsyn(false);

@@ -1,6 +1,6 @@
 {
     "require": {
-        "nmred/kafka-php": "v0.2.0.8",
+        "kwn/php-rdkafka-stubs": "^2.0",
         "ramsey/uuid": "^4.1"
     },
     "autoload": {
