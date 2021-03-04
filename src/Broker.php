@@ -4,8 +4,8 @@ namespace Helloprint;
 
 use PDO;
 use Ramsey\Uuid\Uuid;
-use Kafka\ProducerConfig;
-use Kafka\Producer;
+use RdKafka\Conf;
+use RdKafka\Producer;
 
 class Broker extends PDO
 {
@@ -13,7 +13,7 @@ class Broker extends PDO
 
     public function __construct()
     {
-        $this->con = new PDO('pgsql:host=postgres;dbname=helloprint', 'hpuser', 'secret');        
+        // $this->con = new PDO('pgsql:host=postgres;dbname=helloprint', 'hpuser', 'secret');        
     }
 
     public function getRequestedMessage($message)
@@ -24,13 +24,13 @@ class Broker extends PDO
     public function createRequest($message) 
     {   
         $uuid = Uuid::uuid4();
-        $query = $this->con->prepare("INSERT INTO request1 (token, message) VALUES (:uuid, :message)");
+        // $query = $this->con->prepare("INSERT INTO request1 (token, message) VALUES (:uuid, :message)");
         
         $params = [
             ':uuid' => $uuid->toString(),
             ':message' => $message
         ];
-        $query->execute($params);
+        // $query->execute($params);
         $this->sendMessageToA($params);
         return $uuid;
 
@@ -38,33 +38,16 @@ class Broker extends PDO
 
     public function sendMessageToA($params)
     {
-        $config = ProducerConfig::getInstance();
-        $config->setMetadataRefreshIntervalMs(10000);
-        $config->setMetadataBrokerList('kafka:9092');
-        $config->setBrokerVersion('1.0.0');
-        $config->setRequiredAck(1);
-        $config->setIsAsyn(false);
-        $config->setProduceInterval(500);
+        $conf = new Conf();
 
-        $producer = new Producer(
-            function() use ($params) {
-                return [
-                    [
-                        'topic' => 'topic-a',
-                        'value' => json_encode($params),
-                        'key' => 'key',
-                    ],
-                ];
-            }
-        );
+        $kafka = new Producer($conf);
+        $kafka->addBrokers('kafka');
 
-        $producer->success(function($result) {
-            return $result;
-        });
-        $producer->error(function($errorCode) {
-            return $errorCode;
-        });
-        $producer->send(true);
+        $topic = $kafka->newTopic('topic-a');
+
+        $topic->produce(0, 0, json_encode($params));
+        $kafka->poll(0);
+        $kafka->flush(10000);
 
     }
 
@@ -73,35 +56,18 @@ class Broker extends PDO
         return $this->sendMessageToB($message);
     }
 
-    public function sendMessageToB($message)
+    public function sendMessageToB($params)
     {
-        $config = ProducerConfig::getInstance();
-        $config->setMetadataRefreshIntervalMs(10000);
-        $config->setMetadataBrokerList('localhost:9092');
-        $config->setBrokerVersion('1.0.0');
-        $config->setRequiredAck(1);
-        $config->setIsAsyn(false);
-        $config->setProduceInterval(500);
+        $conf = new Conf();
 
-        $producer = new Producer(
-            function() use ($message) {
-                return [
-                    [
-                        'topic' => 'topic-b',
-                        'value' => json_encode($message),
-                        'key' => 'key',
-                    ],
-                ];
-            }
-        );
+        $kafka = new Producer($conf);
+        $kafka->addBrokers('kafka');
 
-        $producer->success(function($result) {
-            return $result;
-        });
-        $producer->error(function($errorCode) {
-            return $errorCode;
-        });
-        $producer->send(true);
+        $topic = $kafka->newTopic('topic-b');
+
+        $topic->produce(0, 0, json_encode($params));
+        $kafka->poll(0);
+        $kafka->flush(10000);
 
     }
 

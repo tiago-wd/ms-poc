@@ -3,10 +3,9 @@
 namespace Helloprint;
 
 use Helloprint\Broker;
-use Kafka\ConsumerConfig;
-use Kafka\Consumer;
-use Kafka\ProducerConfig;
-use Kafka\Producer;
+use RdKafka\Conf;
+use RdKafka\Consumer;
+use RdKafka\TopicConf;
 
 class ServiceA
 {
@@ -25,22 +24,28 @@ class ServiceA
 
     public function consumeTopicBroker()
     {
-        $config = ConsumerConfig::getInstance();
-        $config->setMetadataRefreshIntervalMs(10000);
-        $config->setMetadataBrokerList('127.0.0.1:9092');
-        $config->setGroupId('broker');
-        $config->setBrokerVersion('1.0.0');
-        $config->setTopics(['broker']);
-        $consumer = new Consumer();
+        $conf = new Conf();
 
-        $consumer->start(function($topic, $part, $message) {            
-            $name = $this->names[array_rand($this->names)];
-            return [
-                "msg" => "Hi {$name}",
-                "token" => $message
-            ];
-        });
+        $conf->set('group.id', 'myConsumerGroup');
+        $kafka = new Consumer($conf);
+        $kafka->addBrokers('kafka');
 
+        $topicConf = new TopicConf();
+        $topicConf->set('auto.commit.interval.ms', 100);
+
+        $topicConf->set('offset.store.method', 'broker');
+        $topicConf->set('auto.offset.reset', 'smallest');
+
+        $topic = $kafka->newTopic('topic-a', $topicConf);
+
+        $topic->consumeStart(0, RD_KAFKA_OFFSET_STORED);
+        $message = $topic->consume(0, 120*10000);
+        
+        $name = $this->names[array_rand($this->names)];
+        //add name to payload
+        if($message->err == RD_KAFKA_RESP_ERR_NO_ERROR) {
+            return $message->payload;
+        }
     }
 
     public function sendMessageToBroker($messageToBroker) 

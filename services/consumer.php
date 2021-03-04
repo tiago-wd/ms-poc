@@ -1,7 +1,7 @@
 <?php
 
 const KAFKA_PARTITION = 0;
-const KAFKA_TOPIC_TEST = 'test';
+const KAFKA_TOPIC_TEST = 'topic-a';
 
 require_once './vendor/autoload.php';
 
