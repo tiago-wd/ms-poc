@@ -14,12 +14,17 @@ class Requester
 
     public function getBrokerMessages($callback) 
     {
-        $wait = 0.05;
+        $wait = 0.0005;
         $stopWatch = 0;
         while ($stopWatch <= 1) {
-            $callback();
+            $message = $callback();
             sleep($wait);
             $stopWatch += $wait;
+            if($message != '') {
+                echo $message;
+                continue;
+            }
         }
+        echo "no response";
     }
 }

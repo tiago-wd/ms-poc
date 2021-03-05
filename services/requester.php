@@ -9,6 +9,6 @@ $broker = new Broker;
 
 $token = $request->sendMessageToBroker('Hi');
 
-// $request->getBrokerMessages(function() use ($broker, $token) {
-//     $broker->messages($token);
-// });
+$request->getBrokerMessages(function() use ($broker, $token) {
+    $broker->messages($token);
+});

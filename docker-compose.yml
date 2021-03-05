@@ -37,3 +37,14 @@ services:
     networks:
       - kafka_broker
       - backend
+      
+  pgadmin:
+    build: ./docker/pgadmin
+    ports:
+      - "5050:5050"
+    depends_on:
+      - postgres
+    volumes:
+      - ${DATA_PATH_HOST}/pgadmin:/var/lib/pgadmin
+    networks:
+      - backend

@@ -7,13 +7,13 @@ use Ramsey\Uuid\Uuid;
 use RdKafka\Conf;
 use RdKafka\Producer;
 
-class Broker extends PDO
+class Broker
 {
     private $con;
 
     public function __construct()
     {
-        // $this->con = new PDO('pgsql:host=postgres;dbname=helloprint', 'hpuser', 'secret');        
+        $this->con = new PDO('pgsql:host=postgres;dbname=helloprint', 'hpuser', 'secret');        
     }
 
     public function getRequestedMessage($message)
@@ -21,17 +21,20 @@ class Broker extends PDO
         return $this->createRequest($message);
     }
 
-    public function createRequest($message) 
+    public function createRequest($request) 
     {   
         $uuid = Uuid::uuid4();
-        // $query = $this->con->prepare("INSERT INTO request1 (token, message) VALUES (:uuid, :message)");
+        $query = $this->con->prepare("INSERT INTO request (token, message) VALUES (:uuid, :message)");
         
-        $params = [
-            ':uuid' => $uuid->toString(),
-            ':message' => $message
+        $message = [
+            'token' => $uuid->toString(),
+            'message' => $request
         ];
-        // $query->execute($params);
-        $this->sendMessageToA($params);
+        $query->execute([
+            ':uuid' => $message['token'],
+            ':message' => $message['message']
+        ]);
+        $this->sendMessageToA($message);
         return $uuid;
 
     }
@@ -65,7 +68,7 @@ class Broker extends PDO
 
         $topic = $kafka->newTopic('topic-b');
 
-        $topic->produce(0, 0, json_encode($params));
+        $topic->produce(0, 0, $params);
         $kafka->poll(0);
         $kafka->flush(10000);
 
@@ -73,12 +76,10 @@ class Broker extends PDO
 
     public function messages($token)
     {
-        echo $token;
-        // if updated send token to requester
+        $query = $this->con->query("SELECT * FROM request WHERE token = '$token' and finished = true");
+        while ($row = $query->fetch()) {
+            echo $row['message'] . "\n";
+        }
     }
 
 }
-
-// $broker = new Broker;
-// $message = $broker->createRequest();
-// $broker->sendMessageToA($message);

@@ -5,6 +5,7 @@ use Helloprint\ServiceA;
 
 $serviceA = new ServiceA;
 
-// add async here
-$message = $serviceA->consumeTopicBroker();
-$serviceA->sendMessageToBroker($message);
+while(true) {
+    $message = $serviceA->consumeTopicBroker();
+    $serviceA->sendMessageToBroker($message);
+}
