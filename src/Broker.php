@@ -35,7 +35,7 @@ class Broker
             ':message' => $message['message']
         ]);
         $this->sendMessageToA($message);
-        return $uuid;
+        return $message['token'];
 
     }
 
@@ -78,8 +78,9 @@ class Broker
     {
         $query = $this->con->query("SELECT * FROM request WHERE token = '$token' and finished = true");
         while ($row = $query->fetch()) {
-            echo $row['message'] . "\n";
+            $getMessage = "{$row['message']} \n";
         }
+        return $getMessage ?? null;
     }
 
 }

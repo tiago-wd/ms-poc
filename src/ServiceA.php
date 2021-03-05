@@ -42,7 +42,7 @@ class ServiceA
         $message = $topic->consume(0, 120*10000);
         
         $name = $this->names[array_rand($this->names)];
-        
+
         if($message->err == RD_KAFKA_RESP_ERR_NO_ERROR) {
             $payload = json_decode($message->payload);
             return json_encode([

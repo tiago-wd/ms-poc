@@ -17,14 +17,9 @@ class Requester
         $wait = 0.0005;
         $stopWatch = 0;
         while ($stopWatch <= 1) {
-            $message = $callback();
+            $callback();
             sleep($wait);
             $stopWatch += $wait;
-            if($message != '') {
-                echo $message;
-                continue;
-            }
         }
-        echo "no response";
     }
 }

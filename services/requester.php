@@ -9,6 +9,9 @@ $broker = new Broker;
 
 $token = $request->sendMessageToBroker('Hi');
 
-$request->getBrokerMessages(function() use ($broker, $token) {
-    $broker->messages($token);
+$message = null;
+$request->getBrokerMessages(function() use ($broker, $token, &$message) {
+    $message = $broker->messages($token);
 });
+
+echo $message ?? "no response";

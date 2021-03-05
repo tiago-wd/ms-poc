@@ -7,5 +7,8 @@ $serviceA = new ServiceA;
 
 while(true) {
     $message = $serviceA->consumeTopicBroker();
-    $serviceA->sendMessageToBroker($message);
+    if($message) {
+        $serviceA->sendMessageToBroker($message);
+    }
+
 }

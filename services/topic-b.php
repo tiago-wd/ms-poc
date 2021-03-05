@@ -7,5 +7,6 @@ $serviceB = new ServiceB;
 
 while(true) {
     $message = $serviceB->consumeTopicA();
-    $serviceB->saveMessage($message);
+    if($message)
+        $serviceB->saveMessage($message);
 }
